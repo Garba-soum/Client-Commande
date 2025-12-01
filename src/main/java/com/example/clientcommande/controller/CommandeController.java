@@ -44,4 +44,9 @@ public class CommandeController {
                                      @Valid @RequestBody CommandeDTO dto) {
         return commandeService.mettreAJourCommande(id, dto);
     }
+
+    @DeleteMapping("/{id}")
+    public void supprimerCommande(@PathVariable Long id){
+        commandeService.supprimerCommande(id);
+    }
 }
