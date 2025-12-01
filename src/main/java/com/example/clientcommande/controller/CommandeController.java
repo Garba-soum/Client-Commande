@@ -38,4 +38,10 @@ public class CommandeController {
     public Commande obtenirCommandeParId(@PathVariable Long id){
         return commandeService.obtenirCommandeParId(id);
     }
+
+    @PutMapping("/{id}")
+    public Commande modifierCommande(@PathVariable Long id,
+                                     @Valid @RequestBody CommandeDTO dto) {
+        return commandeService.mettreAJourCommande(id, dto);
+    }
 }
