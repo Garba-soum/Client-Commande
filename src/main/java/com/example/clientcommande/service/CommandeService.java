@@ -1,5 +1,6 @@
 package com.example.clientcommande.service;
 
+import com.example.clientcommande.Exception.ClientNotFoundException;
 import com.example.clientcommande.model.Client;
 import com.example.clientcommande.model.Commande;
 import com.example.clientcommande.repository.ClientRepository;
@@ -21,7 +22,7 @@ public class CommandeService {
     //Créer une commande associée à un client
     public Commande creerCommande (Commande commande, Long clientId){
         Client client = clientRepository.findById(clientId)
-                .orElseThrow(() -> new RuntimeException("Client introuvable avec id : " + clientId));
+                .orElseThrow(() -> new ClientNotFoundException(clientId));
 
         //Associer la commande au client
         commande.setClient(client);
