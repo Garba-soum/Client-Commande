@@ -1,8 +1,10 @@
 package com.example.clientcommande.service;
 
-import com.example.clientcommande.Exception.ClientNotFoundException;
+import com.example.clientcommande.exception.ClientNotFoundException;
+import com.example.clientcommande.exception.CommandeNotFoundException;
 import com.example.clientcommande.model.Client;
 import com.example.clientcommande.model.Commande;
+import com.example.clientcommande.dto.CommandeDTO;
 import com.example.clientcommande.repository.ClientRepository;
 import com.example.clientcommande.repository.CommandeRepository;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,26 @@ public class CommandeService {
 
     public Commande obtenirCommandeParId(Long id){
         return commandeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Commande introuvable avec id : " + id));
+                .orElseThrow(() -> new CommandeNotFoundException(id));
+    }
+
+    public Commande mettreAJourCommande(Long id, CommandeDTO dto) {
+
+        Commande commande = commandeRepository.findById(id)
+                .orElseThrow(() -> new CommandeNotFoundException(id));
+
+        // Mise à jour des champs
+        commande.setDescription(dto.getDescription());
+        commande.setMontant(dto.getMontant());
+        commande.setDateCommande(dto.getDateCommande());
+
+        // Mise à jour du client si besoin
+        if (dto.getClientId() != null) {
+            Client client = clientRepository.findById(dto.getClientId())
+                    .orElseThrow(() -> new ClientNotFoundException(dto.getClientId()));
+            commande.setClient(client);
+        }
+
+        return commandeRepository.save(commande);
     }
 }

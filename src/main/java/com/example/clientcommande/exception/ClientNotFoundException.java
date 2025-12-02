@@ -1,4 +1,4 @@
-package com.example.clientcommande.Exception;
+package com.example.clientcommande.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

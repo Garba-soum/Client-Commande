@@ -42,5 +42,10 @@ public class ClientController {
         return clientService.obtenirClientParId(id);
     }
 
+    @PutMapping("/{id}")
+    public Client modifierClient(@PathVariable Long id, @Valid @RequestBody ClientDTO clientDTO){
+        return clientService.mettreAjourClient(id, clientDTO);
+    }
+
 
 }

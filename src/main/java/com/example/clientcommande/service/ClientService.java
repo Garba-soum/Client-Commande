@@ -1,5 +1,7 @@
 package com.example.clientcommande.service;
 
+import com.example.clientcommande.exception.ClientNotFoundException;
+import com.example.clientcommande.dto.ClientDTO;
 import com.example.clientcommande.model.Client;
 import com.example.clientcommande.repository.ClientRepository;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,20 @@ public class ClientService {
     //Récupérer un client par son id ou erreur si introuvable
     public Client obtenirClientParId(Long id){
         return clientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Client introuvable avec id :" + id));
+                .orElseThrow(() -> new ClientNotFoundException(id));
     }
+
+    //Modifier un client
+    public Client mettreAjourClient(Long id, ClientDTO dto){
+        Client client = clientRepository.findById(id)
+                .orElseThrow(() -> new ClientNotFoundException(id));
+
+        client.setNom(dto.getNom());
+        client.setEmail(dto.getEmail());
+        client.setTelephone(dto.getTelephone());
+
+        return clientRepository.save(client);
+    }
+
+
 }
