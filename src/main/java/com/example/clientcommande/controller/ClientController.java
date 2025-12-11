@@ -47,5 +47,10 @@ public class ClientController {
         return clientService.mettreAjourClient(id, clientDTO);
     }
 
+    @DeleteMapping("/{id}")
+    public void supprimerClient(@PathVariable Long id){
+        clientService.supprimerClient(id);
+    }
+
 
 }

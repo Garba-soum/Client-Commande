@@ -61,4 +61,11 @@ public class CommandeService {
 
         return commandeRepository.save(commande);
     }
+
+    public void supprimerCommande(Long id){
+        Commande commande = commandeRepository.findById(id)
+                .orElseThrow(() ->new CommandeNotFoundException(id));
+
+        commandeRepository.delete(commande);
+    }
 }
