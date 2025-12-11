@@ -55,10 +55,12 @@ public class ClientController {
     }
 
     @DeleteMapping("/{id}")
+
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> supprimerClient(@PathVariable Long id) {
         clientService.supprimerClient(id);
         return ResponseEntity.ok("Client supprimé avec succès");
     }
+
 
 }

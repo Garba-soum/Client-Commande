@@ -37,6 +37,9 @@ public class SecurityConfig {
                         // Exemple : endpoints d’administration réservés à ADMIN
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
+                        // 🔐 ➕ Actuator réservé aux ADMIN
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

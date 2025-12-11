@@ -55,10 +55,12 @@ public class CommandeController {
     }
 
     @DeleteMapping("/{id}")
+
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> supprimerCommande(@PathVariable Long id) {
         commandeService.supprimerCommande(id);
         return ResponseEntity.ok("Commande supprimée avec succès");
     }
+
 
 }
