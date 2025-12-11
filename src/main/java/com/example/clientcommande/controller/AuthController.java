@@ -72,10 +72,18 @@ public class AuthController {
                     .body("Nom d'utilisateur déjà utilisé");
         }
 
+        //Vérification du role envoyé
+        Role role;
+        try {
+            role = Role.valueOf(request.getRole().toUpperCase());
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("Role invalide : USER ou ADLIN requis");
+        }
+
         AppUser user = AppUser.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER)
+                .role(role)
                 .build();
 
         userRepository.save(user);
