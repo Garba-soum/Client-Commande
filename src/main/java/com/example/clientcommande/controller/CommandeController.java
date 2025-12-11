@@ -4,6 +4,8 @@ import com.example.clientcommande.dto.CommandeDTO;
 import com.example.clientcommande.model.Commande;
 import com.example.clientcommande.service.CommandeService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,8 +20,24 @@ public class CommandeController {
         this.commandeService = commandeService;
     }
 
+    // 🔎 Lister toutes les commandes → USER + ADMIN
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @GetMapping
+    public List<Commande> obtenirToutesLesCommandes() {
+        return commandeService.obtenirToutesLesCommandes();
+    }
+
+    // 🔎 Récupérer une commande par ID → USER + ADMIN
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @GetMapping("/{id}")
+    public Commande obtenirCommandeParId(@PathVariable Long id) {
+        return commandeService.obtenirCommandeParId(id);
+    }
+
+    // ➕ Créer une commande → ADMIN uniquement
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public Commande ajouterCommande(@RequestBody @Valid CommandeDTO commandeDTO){
+    public Commande ajouterCommande(@RequestBody @Valid CommandeDTO commandeDTO) {
         Commande commande = new Commande();
         commande.setDescription(commandeDTO.getDescription());
         commande.setMontant(commandeDTO.getMontant());
@@ -28,17 +46,8 @@ public class CommandeController {
         return commandeService.creerCommande(commande, commandeDTO.getClientId());
     }
 
-    //Lister toutes les commandes
-    @GetMapping
-    public List<Commande> obtenirToutesLesCommandes(){
-        return commandeService.obtenirToutesLesCommandes();
-    }
-
-    @GetMapping("/{id}")
-    public Commande obtenirCommandeParId(@PathVariable Long id){
-        return commandeService.obtenirCommandeParId(id);
-    }
-
+    // ✏️ Modifier une commande → ADMIN uniquement
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public Commande modifierCommande(@PathVariable Long id,
                                      @Valid @RequestBody CommandeDTO dto) {
@@ -46,7 +55,12 @@ public class CommandeController {
     }
 
     @DeleteMapping("/{id}")
-    public void supprimerCommande(@PathVariable Long id){
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> supprimerCommande(@PathVariable Long id) {
         commandeService.supprimerCommande(id);
+        return ResponseEntity.ok("Commande supprimée avec succès");
     }
+
+
 }

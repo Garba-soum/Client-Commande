@@ -45,12 +45,15 @@ public class ClientService {
         return clientRepository.save(client);
     }
 
-    public void supprimerClient(Long id){
+
+    public void supprimerClient(Long id) {
+
         Client client = clientRepository.findById(id)
                 .orElseThrow(() -> new ClientNotFoundException(id));
 
         clientRepository.delete(client);
     }
+
 
 
 }
