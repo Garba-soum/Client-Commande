@@ -17,6 +17,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/auth")
@@ -57,7 +58,7 @@ public class AuthController {
             return new AuthResponse(accessToken, refreshToken);
 
         } catch (AuthenticationException e) {
-            throw new RuntimeException("Identifiants invalides");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Identifiants invalides");
         }
     }
 
