@@ -37,8 +37,13 @@ public class SecurityConfig {
                         // Exemple : endpoints d’administration réservés à ADMIN
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                        // 🔐 ➕ Actuator réservé aux ADMIN
+                        // Actuator
+                        .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
+
+                        // Business
+                        .requestMatchers("/clients/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated()
                 )
