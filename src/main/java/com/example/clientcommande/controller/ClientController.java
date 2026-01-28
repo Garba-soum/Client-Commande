@@ -1,6 +1,7 @@
 package com.example.clientcommande.controller;
 
 import com.example.clientcommande.dto.ClientDTO;
+import com.example.clientcommande.dto.ClientListDTO;
 import com.example.clientcommande.model.Client;
 import com.example.clientcommande.service.ClientService;
 import jakarta.validation.Valid;
@@ -23,8 +24,8 @@ public class ClientController {
     // 🔎 Lister tous les clients → USER + ADMIN
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping
-    public List<Client> obtenirTousLesClients() {
-        return clientService.obtenirTousLesClients();
+    public List<ClientListDTO> obtenirTousLesClients() {
+        return clientService.obtenirTousLesClientsAvecCount();
     }
 
     // 🔎 Récupérer un client par ID → USER + ADMIN
