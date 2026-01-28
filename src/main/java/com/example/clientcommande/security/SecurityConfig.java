@@ -39,7 +39,8 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         // ✅ Public
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/auth/login", "/auth/register", "/auth/refresh").permitAll()
+                        .requestMatchers("/auth/register-admin").hasRole("ADMIN")
                         .requestMatchers("/actuator/health").permitAll()
 
                         // ✅ Protégé

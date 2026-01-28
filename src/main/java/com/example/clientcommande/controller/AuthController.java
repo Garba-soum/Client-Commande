@@ -10,6 +10,7 @@ import com.example.clientcommande.repository.AppUserRepository;
 import com.example.clientcommande.security.JwtService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -76,30 +77,25 @@ public class AuthController {
                     .body("Nom d'utilisateur déjà utilisé");
         }
 
-        // Vérification du role envoyé
-        Role role;
-        try {
-            role = Role.valueOf(request.getRole().toUpperCase());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Role invalide : USER ou ADMIN requis");
-        }
+
 
         AppUser user = AppUser.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(role)
+                .role(Role.USER)
                 .build();
 
         userRepository.save(user);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body("Utilisateur créé avec succès. Vous pouvez maintenant vous connecter.");
+                .body("Compte créé avec succès. Vous pouvez maintenant vous connecter.");
     }
 
     // ======================
     //   REGISTER ADMIN
     // ======================
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/register-admin")
     public ResponseEntity<?> registerAdmin(@RequestBody RegisterRequest request) {
 
