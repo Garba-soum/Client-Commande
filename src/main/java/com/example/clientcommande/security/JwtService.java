@@ -5,11 +5,15 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
@@ -24,27 +28,35 @@ public class JwtService {
     private long refreshExpirationMs;
 
     private Key getSignInKey() {
-        // ⚠️ IMPORTANT : on ne décode plus en Base64, on prend les bytes directement
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
     // =======================
     //  GENERATION DES TOKENS
     // =======================
-    public String generateAccessToken(String username) {
-        return buildToken(username, accessExpirationMs);
+
+    // ✅ Access token avec roles
+    public String generateAccessToken(UserDetails userDetails) {
+        return buildToken(userDetails, accessExpirationMs);
     }
 
-    public String generateRefreshToken(String username) {
-        return buildToken(username, refreshExpirationMs);
+    // ✅ Refresh token (tu peux mettre roles aussi ou non, mais recommandé de garder cohérent)
+    public String generateRefreshToken(UserDetails userDetails) {
+        return buildToken(userDetails, refreshExpirationMs);
     }
 
-    private String buildToken(String username, long expirationMs) {
+    private String buildToken(UserDetails userDetails, long expirationMs) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationMs);
 
+        List<String> roles = userDetails.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority) // ex: ROLE_ADMIN
+                .collect(Collectors.toList());
+
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(userDetails.getUsername())
+                .claim("roles", roles) // ✅ ajout roles dans le payload
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
@@ -74,7 +86,7 @@ public class JwtService {
     // =======================
     //   VALIDATION TOKEN
     // =======================
-    public boolean isTokenValid(String token, org.springframework.security.core.userdetails.UserDetails userDetails) {
+    public boolean isTokenValid(String token, UserDetails userDetails) {
         String username = extractUsername(token);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }

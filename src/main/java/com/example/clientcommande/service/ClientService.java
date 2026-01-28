@@ -1,9 +1,11 @@
 package com.example.clientcommande.service;
 
+import com.example.clientcommande.dto.ClientListDTO;
 import com.example.clientcommande.exception.ClientNotFoundException;
 import com.example.clientcommande.dto.ClientDTO;
 import com.example.clientcommande.model.Client;
 import com.example.clientcommande.repository.ClientRepository;
+import com.example.clientcommande.repository.CommandeRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,10 +13,12 @@ import java.util.List;
 @Service
 public class ClientService {
     private final ClientRepository clientRepository;
+    private final CommandeRepository commandeRepository;
 
     // Injection par constructeur
-    public ClientService(ClientRepository clientRepository) {
+    public ClientService(ClientRepository clientRepository, CommandeRepository commandeRepository) {
         this.clientRepository = clientRepository;
+        this.commandeRepository = commandeRepository;
     }
 
     //Créer un client
@@ -53,6 +57,22 @@ public class ClientService {
 
         clientRepository.delete(client);
     }
+
+    //Obtenir les client avec le nombre
+    public List<ClientListDTO> obtenirTousLesClientsAvecCount() {
+        List<Client> clients = clientRepository.findAll();
+
+        return clients.stream()
+                .map(c -> new ClientListDTO(
+                        c.getId(),
+                        c.getNom(),
+                        c.getEmail(),
+                        c.getTelephone(),
+                        commandeRepository.countByClientId(c.getId())
+                ))
+                .toList();
+    }
+
 
 
 

@@ -10,7 +10,6 @@ import com.example.clientcommande.repository.AppUserRepository;
 import com.example.clientcommande.security.JwtService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -52,8 +51,12 @@ public class AuthController {
 
             authenticationManager.authenticate(authToken);
 
-            String accessToken = jwtService.generateAccessToken(request.getUsername());
-            String refreshToken = jwtService.generateRefreshToken(request.getUsername());
+            // ✅ Charger l'utilisateur pour récupérer ses rôles/authorities
+            AppUser user = userRepository.findByUsername(request.getUsername())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Utilisateur introuvable"));
+
+            String accessToken = jwtService.generateAccessToken(user);
+            String refreshToken = jwtService.generateRefreshToken(user);
 
             return new AuthResponse(accessToken, refreshToken);
 
@@ -73,12 +76,12 @@ public class AuthController {
                     .body("Nom d'utilisateur déjà utilisé");
         }
 
-        //Vérification du role envoyé
+        // Vérification du role envoyé
         Role role;
         try {
             role = Role.valueOf(request.getRole().toUpperCase());
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body("Role invalide : USER ou ADLIN requis");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Role invalide : USER ou ADMIN requis");
         }
 
         AppUser user = AppUser.builder()
@@ -94,8 +97,9 @@ public class AuthController {
                 .body("Utilisateur créé avec succès. Vous pouvez maintenant vous connecter.");
     }
 
-    // Admin
-    //@PreAuthorize("hasRole('ADMIN')")
+    // ======================
+    //   REGISTER ADMIN
+    // ======================
     @PostMapping("/register-admin")
     public ResponseEntity<?> registerAdmin(@RequestBody RegisterRequest request) {
 
@@ -128,15 +132,16 @@ public class AuthController {
             AppUser user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
-            // On vérifie que le refresh token est encore valide
-            if (!jwtService.isTokenValid(refreshToken, (UserDetails) user)) {
+            // ✅ Vérifie que le refresh token est encore valide
+            if (!jwtService.isTokenValid(refreshToken, user)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body("Refresh token invalide ou expiré");
             }
 
-            String newAccessToken = jwtService.generateAccessToken(username);
+            // ✅ Nouveau access token avec roles
+            String newAccessToken = jwtService.generateAccessToken(user);
 
-            // Ici on garde le même refreshToken (pas de rotation avancée)
+            // On garde le même refreshToken
             return ResponseEntity.ok(new AuthResponse(newAccessToken, refreshToken));
 
         } catch (Exception e) {
